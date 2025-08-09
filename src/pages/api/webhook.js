@@ -1,89 +1,82 @@
-import { buffer } from 'micro'
-import * as admin from 'firebase-admin'
+import { buffer } from 'micro';
+import * as admin from 'firebase-admin';
+import Stripe from 'stripe';
 
-//secure a connection to FIREBASE from the backend
-const serviceAccount = require(permissions)
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: '2022-11-15',
+});
 
-
-//                  --PERMISSIONS--
-const permissions = {
+const serviceAccount = {
   type: process.env.type,
   project_id: process.env.project_id,
   private_key_id: process.env.private_key_id,
-  private_key: process.env.private_key,
+  private_key: process.env.private_key?.replace(/\\n/g, '\n'), // 🔥 Important
   client_email: process.env.client_email,
   client_id: process.env.client_id,
   auth_uri: process.env.auth_uri,
   token_uri: process.env.token_uri,
-  auth_provider_x509_cert_url: process.env.auth_provider_x509_cert_url ,
-  client_x509_cert_url: process.env.client_x509_cert_url
-
+  auth_provider_x509_cert_url: process.env.auth_provider_x509_cert_url,
+  client_x509_cert_url: process.env.client_x509_cert_url,
 };
 
-const app = !admin.apps.length ? admin.initializeApp({
+// Firebase init
+if (!admin.apps.length) {
+  admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-})
-:admin.app()
+  });
+}
 
-//Establish connection to stripe
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
-
-const endpointSecret = process.env.STRIPE_SIGNING_SECRET
+const endpointSecret = process.env.STRIPE_SIGNING_SECRET;
 
 const fulfilOrder = async (session) => {
-    //console.log('fulfil order', session)
-
-    return app
+  return admin
     .firestore()
     .collection('users')
     .doc(session.metadata.email)
     .collection('orders')
     .doc(session.id)
     .set({
-        amount: session.amount_total / 100,
-        amount_shipping: session.total_details.amount_shipping / 100,
-        images: JSON.parse(session.metadata.images),
-        timestamp: admin.firestore.FieldValue.serverTimestamp(),
-    })
-    .then(() => {
-        console.log(`SUCCESS: Order ${session.id} has been added to the DB`);
+      amount: session.amount_total / 100,
+      amount_shipping: session.total_details.amount_shipping / 100,
+      images: JSON.parse(session.metadata.images),
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
     });
 };
 
-export default async (req, res) => {
-    if(req.method === 'POST'){
-        const requestBuffer = await buffer(req)
-        const payload = requestBuffer.toString()
-        const sig = req.headers["stripe-signature"]
+export default async function handler(req, res) {
+  if (req.method === 'POST') {
+    const buf = await buffer(req);
+    const sig = req.headers['stripe-signature'];
 
-        let event;  
-       
-        //verify that the EVENT posted cams from STRIPE
-        try{
-            event = stripe.webhooks.constructEvent(payload, sig, endpointSecret)
-        } catch (err) {
-            console.log('ERROR', err.message)
-            return res.status(400).send(`Webhook err: ${err.message}`)
-        }
+    let event;
 
-        //Handle the checkout.session.completed event
-        if (event.type === "checkout.session.completed") {
-            const session = event.data.object;
-
-            //fulfil the orders..
-            return fulfilOrder(session)
-            .then(() => res.status(200).end())
-            .catch((err) => res.status(400).send(`webhook Error: ${err.message}`))
-        }
-
-
-
+    try {
+      event = stripe.webhooks.constructEvent(buf.toString(), sig, endpointSecret);
+    } catch (err) {
+      console.error('⚠️ Webhook signature verification failed.', err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
     }
+
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object;
+
+      try {
+        await fulfilOrder(session);
+        return res.status(200).end();
+      } catch (err) {
+        return res.status(400).send(`Webhook fulfilment error: ${err.message}`);
+      }
+    }
+
+    res.status(200).end();
+  } else {
+    res.setHeader('Allow', 'POST');
+    res.status(405).end('Method Not Allowed');
+  }
 }
 
 export const config = {
-    api: {
-        bodyParser: false,
-        externalResolver: true
-    }
-}
+  api: {
+    bodyParser: false,
+  },
+};
