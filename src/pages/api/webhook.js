@@ -7,8 +7,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 });
 
 const serviceAccount = {
-
-
   type: process.env.type,
   project_id: process.env.project_id,
   private_key_id: process.env.private_key_id,
@@ -19,7 +17,6 @@ const serviceAccount = {
   token_uri: process.env.token_uri,
   auth_provider_x509_cert_url: process.env.auth_provider_x509_cert_url,
   client_x509_cert_url: process.env.client_x509_cert_url,
-
 };
 
 // Firebase init
@@ -29,15 +26,10 @@ if (!admin.apps.length) {
   });
 }
 
-
-
-
 const endpointSecret = process.env.STRIPE_SIGNING_SECRET;
 
 const fulfilOrder = async (session) => {
   return admin
-
-
     .firestore()
     .collection('users')
     .doc(session.metadata.email)
@@ -48,9 +40,6 @@ const fulfilOrder = async (session) => {
       amount_shipping: session.total_details.amount_shipping / 100,
       images: JSON.parse(session.metadata.images),
       timestamp: admin.firestore.FieldValue.serverTimestamp(),
-
-
-
     });
 };
 
@@ -59,26 +48,7 @@ export default async function handler(req, res) {
     const buf = await buffer(req);
     const sig = req.headers['stripe-signature'];
 
-
-
-
-
-
-
-
-
-
-
-
     let event;
-
-
-
-
-
-
-
-
 
     try {
       event = stripe.webhooks.constructEvent(buf.toString(), sig, endpointSecret);
