@@ -20,7 +20,7 @@ export default async (req, res) => {
         const transformedItems = items.map(item => ({
             quantity: 1,
             price_data: {
-                currency: 'usd', // Changed back to USD as CDF might not be supported
+                currency: 'USD', // Changed back to USD as CDF might not be supported
                 unit_amount: Math.round(item.price * 100), // Convert to cents
                 product_data: {
                     name: item.title,
