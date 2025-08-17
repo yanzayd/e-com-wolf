@@ -6,7 +6,7 @@ import moment from 'moment';
 import db from "../../firebase"
 import Order from '../components/Order';
 
-function orders({ orders }) {
+function Orders({ orders }) {
     const { data: session } = useSession();
 
     console.log(orders)
@@ -46,7 +46,7 @@ function orders({ orders }) {
     )
 }
 
-export default orders
+export default Orders  
 
 export async function getServerSideProps(context) {
     // const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);

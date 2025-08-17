@@ -22,6 +22,7 @@ function Banner() {
                     width={1600}
                     height={600}
                     style={{ objectFit: "cover" }}
+                    priority={true}
                 />
             </div>
             
@@ -32,6 +33,7 @@ function Banner() {
                     width={1600}
                     height={600}
                     style={{ objectFit: "cover" }}
+                    priority={true}
                 />
             </div>
             
@@ -42,6 +44,7 @@ function Banner() {
                     width={1600}
                     height={600}
                     style={{ objectFit: "cover" }}
+                    priority={true}
                 />
             </div>
         </Carousel>

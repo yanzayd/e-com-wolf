@@ -46,6 +46,7 @@ function Product({ id, title, price, description, category, image, comboImages }
                 width={200} 
                 style={{ objectFit: "contain" }} 
                 alt={title}
+                priority={image.includes("hambClassic01_jdhmss.png")}
             />
 
             <h4 className='my-3'>{title}</h4>

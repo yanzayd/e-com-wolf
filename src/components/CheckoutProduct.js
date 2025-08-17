@@ -5,7 +5,6 @@ import Currency from "react-currency-formatter"
 import { useDispatch } from 'react-redux'
 import { addToBasket, removeFromBasket } from "../slices/basketSlice"
 
-
 function CheckoutProduct({
     id,
     title,
@@ -29,17 +28,13 @@ function CheckoutProduct({
             category,
             image,
             hasPrime,
-
         }
-        //Push item into redux
         dispatch(addToBasket(product))
     }
-    
-    const removeItemFromBasket = () =>{
-        //remove item from redux
-        dispatch(removeFromBasket({id}))
-    }
 
+    const removeItemFromBasket = () => {
+        dispatch(removeFromBasket({ id }))
+    }
 
     return (
         <div className='grid grid-cols-5'>
@@ -49,7 +44,9 @@ function CheckoutProduct({
                 height={200}
                 width={200}
                 style={{ objectFit: "contain" }}
+                alt={title}
             />
+
             {/* middle section */}
             <div className='col-span-3 mx-5'>
                 <p>{title}</p>
@@ -62,6 +59,8 @@ function CheckoutProduct({
                 </div>
 
                 <p className='text-xs my-2 line-clamp-4'>{description}</p>
+                
+                {/* ✅ Ceci est maintenant bien placé */}
                 <Currency quantity={price} currency="CDF" />
 
                 {hasPrime && (
@@ -76,14 +75,14 @@ function CheckoutProduct({
                     </div>
                 )}
             </div>
-            {/* Right add/remove button */}
-            <div className='flex flex-col space-y-2 my-auto justify-self-end '>
+
+            {/* Right add/remove buttons */}
+            <div className='flex flex-col space-y-2 my-auto justify-self-end'>
                 <button className='button' onClick={addItemToBasket}>Add to Basket</button>
                 <button className='button' onClick={removeItemFromBasket}>Remove from Basket</button>
-
             </div>
         </div>
     );
 }
 
-export default CheckoutProduct
+export default CheckoutProduct;
