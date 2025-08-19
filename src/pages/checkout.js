@@ -9,7 +9,7 @@ import { useSession } from 'next-auth/react';
 import { loadStripe } from '@stripe/stripe-js';
 import axios from 'axios';
 
-const stripePromise = loadStripe(process.env.stripe_public_key)
+const stripePromise = loadStripe(process.env.STRIPE_PUBLIC_KEY)
 
 function Checkout() {
     const items = useSelector(selectItems);
@@ -17,23 +17,27 @@ function Checkout() {
     const { data: session } = useSession();
 
     const createCheckoutSession = async () => {
-         const stripe = await stripePromise;
-
-         //call the backend to create a checkout session...
-         const checkoutSession = await axios.post("/api/create-checkout-session", {
+        try {
+        const stripe = await stripePromise;
+        if (!stripe) {
+            throw new Error("Stripe failed to initialize");
+        }
+        
+        const checkoutSession = await axios.post("/api/create-checkout-session", {
             items: items,
             email: session.user.email,
-         })
-
-        //redirect user/customer to stripe checkout
+        });
+        
         const result = await stripe.redirectToCheckout({
             sessionId: checkoutSession.data.id
-        })
-
-        if (result.error) alert(result.error.message)
-
+        });
+        
+        if (result.error) alert(result.error.message);
+    } catch (error) {
+        console.error("Error during checkout:", error);
+        alert(`Checkout error: ${error.message}`);
     }
-   
+}
 
     return (
         <div className='bg-gray-100 '>
