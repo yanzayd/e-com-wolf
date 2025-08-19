@@ -35,7 +35,7 @@ export default async (req, res) => {
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             shipping_address_collection: {
-                allowed_countries: ['US', 'CA', 'GB','CDF'], // Use supported countries
+                allowed_countries: ['US', 'CA', 'GB','CD'], // Use supported countries
             },
             line_items: transformedItems,
             mode: 'payment',
@@ -57,7 +57,7 @@ export default async (req, res) => {
         });
     }
 
-    console.log("STRIPE_SECRET_KEY:", process.env.STRIPE_SECRET_KEY ? "[OK]" : "[NOT SET]");
+    // console.log("STRIPE_SECRET_KEY:", process.env.STRIPE_SECRET_KEY ? "[OK]" : "[NOT SET]");
 
 
 };

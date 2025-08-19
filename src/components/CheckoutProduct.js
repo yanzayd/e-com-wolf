@@ -60,7 +60,7 @@ function CheckoutProduct({
 
                 <p className='text-xs my-2 line-clamp-4'>{description}</p>
                 
-                {/* ✅ Ceci est maintenant bien placé */}
+                {/* Ceci est maintenant bien placé */}
                 <Currency quantity={price} currency="CDF" />
 
                 {hasPrime && (
