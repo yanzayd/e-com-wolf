@@ -10,6 +10,7 @@ function Orders({ orders }) {
     const { data: session } = useSession();
 
     console.log(orders)
+    console.log("STRIPE_SECRET_KEY:", process.env.STRIPE_SECRET_KEY ? "[OK]" : "[NOT SET]");
   
     return (
         <div>

@@ -56,4 +56,8 @@ export default async (req, res) => {
             code: err.code || 'unknown'
         });
     }
+
+    console.log("STRIPE_SECRET_KEY:", process.env.STRIPE_SECRET_KEY ? "[OK]" : "[NOT SET]");
+
+
 };
